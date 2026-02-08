@@ -6,6 +6,7 @@ import { InputForm } from './components/InputForm'
 import { ResultsChart } from './components/ResultsChart'
 import { SummaryCard } from './components/SummaryCard'
 import { BreakdownCard } from './components/BreakdownCard'
+import { StrategyHeatmap } from './components/StrategyHeatmap'
 
 function App() {
   const [inputs, setInputs] = useState<CalculationInputs>(defaultInputs)
@@ -60,6 +61,27 @@ function App() {
             onSwitchYearsChange={setSwitchYears}
             onTimePeriodChange={setTimePeriod}
           />
+          <details className="rounded-lg border border-gray-200 overflow-hidden group bg-white shadow-sm">
+            <summary className="list-none cursor-pointer flex items-center gap-2 p-4 sm:p-5 border-b border-gray-100 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none [&::-webkit-details-marker]:hidden select-none">
+              <span className="text-gray-400 transition-transform duration-200 group-open:rotate-90" aria-hidden>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+              </span>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+                Yearly breakdown
+              </h2>
+            </summary>
+            <div className="p-4 sm:p-5 bg-gray-50/50">
+              <BreakdownCard 
+                comparison={comparison} 
+                inputs={inputs}
+                leftStrategy={leftStrategy}
+                rightStrategy={rightStrategy}
+                splitRatio={splitRatio}
+                switchYears={switchYears}
+                timePeriod={timePeriod}
+              />
+            </div>
+          </details>
           <ResultsChart 
             comparison={comparison} 
             inputs={inputs} 
@@ -69,14 +91,12 @@ function App() {
             switchYears={switchYears}
             timePeriod={timePeriod}
           />
-          <BreakdownCard 
-            comparison={comparison} 
+          <StrategyHeatmap
             inputs={inputs}
             leftStrategy={leftStrategy}
             rightStrategy={rightStrategy}
             splitRatio={splitRatio}
             switchYears={switchYears}
-            timePeriod={timePeriod}
           />
         </div>
       </main>

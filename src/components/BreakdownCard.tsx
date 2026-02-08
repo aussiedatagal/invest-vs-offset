@@ -49,27 +49,19 @@ export function BreakdownCard({ comparison, inputs, leftStrategy, rightStrategy,
   if (displayData.periods.length === 0) return null
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h2 className="text-2xl font-bold text-gray-900 mb-4">
-        Detailed Breakdown Comparison
-      </h2>
-      <p className="text-sm text-gray-500 mb-6">
-        Year-over-year changes and cumulative totals
-      </p>
-      
-      <div className="overflow-x-auto">
-        <div className="space-y-8">
-          {displayData.periods.map(({ period, label }) => {
-            const left = displayData.left.find(r => r.year === period)
-            const right = displayData.right.find(r => r.year === period)
-            
-            if (!left || !right) return null
+    <div className="overflow-x-auto">
+      <div className="space-y-6">
+        {displayData.periods.map(({ period, label }) => {
+          const left = displayData.left.find(r => r.year === period)
+          const right = displayData.right.find(r => r.year === period)
+          
+          if (!left || !right) return null
 
-            return (
-              <div key={period} className="border border-gray-200 rounded-lg p-4">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  {label}
-                </h3>
+          return (
+            <section key={period} className="border border-gray-200 rounded-lg bg-white p-4 sm:p-5">
+              <h3 className="text-base font-semibold text-gray-900 mb-4">
+                {label}
+              </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4 flex flex-col">
                     <h4 className="text-sm font-semibold text-green-900 border-b border-green-200 pb-2">
@@ -451,10 +443,9 @@ export function BreakdownCard({ comparison, inputs, leftStrategy, rightStrategy,
                     </div>
                   </div>
                 </div>
-              </div>
+              </section>
             )
           })}
-        </div>
       </div>
     </div>
   )

@@ -20,6 +20,19 @@ const getStrategyName = (strategy: 'allOffset' | 'allInvestment' | 'split' | 'of
   return `Split between offset and investments (${Math.round((splitRatio || 0.5) * 100)}% offset)`
 }
 
+function formatAxisCurrency(value: number): string {
+  const sign = value < 0 ? '-' : ''
+  const abs = Math.abs(value)
+  if (abs >= 1_000_000) {
+    const m = abs / 1_000_000
+    const s = m % 1 === 0 ? String(m) : m.toFixed(1)
+    return `${sign}$${s}m`
+  }
+  const k = abs / 1000
+  const s = k % 1 === 0 ? String(k) : k.toFixed(1)
+  return `${sign}$${s}k`
+}
+
 export function ResultsChart({ comparison, inputs, leftStrategy, rightStrategy, splitRatio, switchYears, timePeriod }: ResultsChartProps) {
   const maxYear = comparison.left.length > 0 
     ? Math.max(...comparison.left.map(d => d.year)) 
@@ -56,7 +69,7 @@ export function ResultsChart({ comparison, inputs, leftStrategy, rightStrategy, 
       </p>
       <div className="w-full h-96">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+          <LineChart data={chartData} margin={{ top: 5, right: 30, left: 78, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis 
               dataKey="year" 
@@ -65,9 +78,9 @@ export function ResultsChart({ comparison, inputs, leftStrategy, rightStrategy, 
               type="number"
               allowDecimals={false}
             />
-            <YAxis 
-              label={{ value: 'Net Worth ($)', angle: -90, position: 'insideLeft' }}
-              tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+            <YAxis
+              label={{ value: 'Net Worth ($)', angle: -90, position: 'insideLeft', offset: -32 }}
+              tickFormatter={formatAxisCurrency}
             />
             <Tooltip 
               contentStyle={{ backgroundColor: '#fff', border: '1px solid #ccc' }}
@@ -123,10 +136,10 @@ export function ResultsChart({ comparison, inputs, leftStrategy, rightStrategy, 
       </div>
       
       <div className="mt-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-3">Mortgage Balance Over Time</h3>
-        <div className="w-full h-64">
+        <h3 className="text-lg font-semibold text-gray-900 mb-5">Mortgage Balance Over Time</h3>
+        <div className="w-full h-64 mt-1">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            <LineChart data={chartData} margin={{ top: 28, right: 30, left: 78, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis 
                 dataKey="year" 
@@ -135,9 +148,9 @@ export function ResultsChart({ comparison, inputs, leftStrategy, rightStrategy, 
                 type="number"
                 allowDecimals={false}
               />
-              <YAxis 
-                label={{ value: 'Mortgage Balance ($)', angle: -90, position: 'insideLeft' }}
-                tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+              <YAxis
+                label={{ value: 'Mortgage Balance ($)', angle: -90, position: 'insideLeft', offset: -32, dy: 24 }}
+                tickFormatter={formatAxisCurrency}
               />
               <Tooltip 
                 contentStyle={{ backgroundColor: '#fff', border: '1px solid #ccc' }}
