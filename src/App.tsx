@@ -7,6 +7,8 @@ import { ResultsChart } from './components/ResultsChart'
 import { SummaryCard } from './components/SummaryCard'
 import { BreakdownCard } from './components/BreakdownCard'
 import { StrategyHeatmap } from './components/StrategyHeatmap'
+import { HistoricalSection } from './components/HistoricalSection'
+import { generalSources } from './utils/sources'
 
 function App() {
   const [inputs, setInputs] = useState<CalculationInputs>(defaultInputs)
@@ -98,11 +100,32 @@ function App() {
             splitRatio={splitRatio}
             switchYears={switchYears}
           />
+          <HistoricalSection
+            inputs={inputsWithStrategyParams}
+            leftStrategy={leftStrategy}
+            rightStrategy={rightStrategy}
+            splitRatio={splitRatio}
+            switchYears={switchYears}
+          />
+
+          <section className="bg-white rounded-lg shadow-md p-6" aria-labelledby="sources-heading">
+            <h2 id="sources-heading" className="text-2xl font-bold text-gray-900 mb-4">Sources and further reading</h2>
+            <ul className="list-none space-y-2 text-sm">
+              {generalSources.map((s) => (
+                <li key={s.url}>
+                  <a href={s.url} target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:underline">
+                    {s.name}
+                  </a>
+                  <span className="text-gray-500"> – {s.description}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
         </div>
       </main>
 
       <footer className="bg-white border-t border-gray-200 mt-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-4">
           <p className="text-xs text-gray-500">
             <strong>Disclaimer:</strong> This calculator is for educational purposes only. 
             It provides projections based on your inputs and does not constitute financial advice. 
@@ -111,10 +134,14 @@ function App() {
             financial decisions. Calculations assume annual compounding and may not reflect all tax nuances 
             or investment fees.
           </p>
-          <p className="text-xs text-gray-500 mt-2">
+          <p className="text-xs text-gray-500">
             <strong>Note:</strong> Default values are based on historical averages and current market data. 
-            See the Sources section above for detailed references. All calculations are estimates and actual 
+            Source links appear next to each input and in the Sources section above. All calculations are estimates and actual 
             results may vary significantly.
+          </p>
+          <p className="text-xs text-gray-500 border-t border-gray-200 pt-4 mt-4">
+            By <a href="https://aussiedatagal.github.io/" target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:underline">aussiedatagal</a>.
+            This project is provided as-is under the <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:underline">MIT License</a>; see the LICENSE file in the source repository for full terms. No warranty is given.
           </p>
         </div>
       </footer>

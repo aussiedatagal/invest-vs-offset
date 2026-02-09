@@ -11,20 +11,30 @@ import type { StrategyState, StrategyContext } from './strategies/types'
 
 export { calculateAmortizedPayment }
 
+export interface YearlyRateOverride {
+  mortgageInterestRate: number
+  investmentReturnRate: number
+  dividendYield?: number
+}
+
 export function calculateStrategy(
   inputs: CalculationInputs,
-  maxYears?: number
+  maxYears?: number,
+  yearlyRates?: YearlyRateOverride[],
+  startFinancialYear?: number
 ): YearResult[] {
   const results: YearResult[] = []
   const strategy = getStrategy(inputs)
 
   const annualContribution = (inputs.weeklyContribution || 0) * 52
-  const yearsToRun = maxYears || inputs.years
-  const mortgagePayment = calculateAmortizedPayment(
+  const useYearlyRates = yearlyRates && yearlyRates.length > 0
+  const yearsToRun = useYearlyRates ? yearlyRates.length : (maxYears || inputs.years)
+  const baseMortgagePayment = calculateAmortizedPayment(
     inputs.mortgageBalance,
     inputs.mortgageInterestRate,
     inputs.years
   )
+  let mortgagePayment = baseMortgagePayment
 
   let cumulativeCapitalGain = 0
   let totalAfterTaxDividends = 0
@@ -37,7 +47,7 @@ export function calculateStrategy(
   let actualInvestmentContributions = 0
   let freedUpMortgagePaymentsTotal = 0
 
-  const effectiveInterestRate = inputs.isInvestmentProperty
+  let effectiveInterestRate = inputs.isInvestmentProperty
     ? inputs.mortgageInterestRate * (1 - inputs.personalTaxRate)
     : inputs.mortgageInterestRate
 
@@ -60,8 +70,27 @@ export function calculateStrategy(
     const startState = { ...state }
     const mortgagePaidOff = startState.mortgageBalance <= 0
 
+    let inputsForYear = inputs
+    if (useYearlyRates && yearlyRates && year <= yearlyRates.length) {
+      const yr = yearlyRates[year - 1]
+      inputsForYear = {
+        ...inputs,
+        mortgageInterestRate: yr.mortgageInterestRate,
+        investmentReturnRate: yr.investmentReturnRate,
+        dividendYield: yr.dividendYield ?? inputs.dividendYield,
+      }
+      effectiveInterestRate = inputs.isInvestmentProperty
+        ? yr.mortgageInterestRate * (1 - inputs.personalTaxRate)
+        : yr.mortgageInterestRate
+      const yearsRemaining = yearsToRun - year + 1
+      mortgagePayment =
+        startState.mortgageBalance > 0 && yearsRemaining > 0
+          ? calculateAmortizedPayment(startState.mortgageBalance, yr.mortgageInterestRate, yearsRemaining)
+          : baseMortgagePayment
+    }
+
     const context: StrategyContext = {
-      inputs,
+      inputs: inputsForYear,
       mortgagePayment,
       annualContribution,
       effectiveInterestRate,
@@ -101,7 +130,7 @@ export function calculateStrategy(
     // This assumes contributions are made at the end of the year (or earn returns for half year on average)
     // handleExcessOffset is called before growth so offset moved to investments can earn growth
     const investmentValueBeforeContributions = state.investmentValue
-    const growth = calculateInvestmentGrowth(investmentValueBeforeContributions, inputs)
+    const growth = calculateInvestmentGrowth(investmentValueBeforeContributions, inputsForYear)
     cumulativeCapitalGain += growth.yearCapitalGain
     cumulativeDividendTax += growth.yearDividendTax
     totalAfterTaxDividends += growth.afterTaxDividends
@@ -159,8 +188,9 @@ export function calculateStrategy(
       taxRefundToInvestment = taxRefundFromInterest * taxRefundProportionToInvestment
     }
 
+    const displayYear = startFinancialYear != null ? startFinancialYear + year - 1 : year
     results.push({
-      year,
+      year: displayYear,
       mortgageBalance: state.mortgageBalance,
       previousMortgageBalance: startState.mortgageBalance,
       mortgageInterest: mortgageResult.interestAccrued,
@@ -213,11 +243,18 @@ function findPayoffYear(inputs: CalculationInputs): number {
   return maxSearchYears
 }
 
+export interface CalculateComparisonOptions {
+  maxYearsOverride?: number
+  yearlyRates?: YearlyRateOverride[]
+  startFinancialYear?: number
+}
+
 export function calculateComparison(
-  inputs: CalculationInputs, 
+  inputs: CalculationInputs,
   leftStrategy: 'allOffset' | 'allInvestment' | 'split' | 'offsetThenInvestment' | 'offsetThenInvestmentMove' = 'allOffset',
   rightStrategy: 'allOffset' | 'allInvestment' | 'split' | 'offsetThenInvestment' | 'offsetThenInvestmentMove' = 'allInvestment',
-  maxYearsOverride?: number
+  maxYearsOverride?: number,
+  options?: CalculateComparisonOptions
 ): {
   left: YearResult[]
   right: YearResult[]
@@ -227,8 +264,14 @@ export function calculateComparison(
   const leftInputs = { ...inputs, strategy: leftStrategy as 'allOffset' | 'allInvestment' | 'split' | 'offsetThenInvestment' | 'offsetThenInvestmentMove' }
   const rightInputs = { ...inputs, strategy: rightStrategy as 'allOffset' | 'allInvestment' | 'split' | 'offsetThenInvestment' | 'offsetThenInvestmentMove' }
 
+  const yearlyRates = options?.yearlyRates
+  const startFinancialYear = options?.startFinancialYear
+  const useYearly = yearlyRates && yearlyRates.length > 0
+
   let maxYears: number
-  if (maxYearsOverride !== undefined) {
+  if (useYearly) {
+    maxYears = yearlyRates.length
+  } else if (maxYearsOverride !== undefined) {
     maxYears = maxYearsOverride
   } else {
     const leftPayoffYear = findPayoffYear(leftInputs)
@@ -236,8 +279,12 @@ export function calculateComparison(
     maxYears = Math.max(leftPayoffYear, rightPayoffYear)
   }
 
-  const left = calculateStrategy(leftInputs, maxYears)
-  const right = calculateStrategy(rightInputs, maxYears)
+  const left = useYearly
+    ? calculateStrategy(leftInputs, maxYears, yearlyRates, startFinancialYear)
+    : calculateStrategy(leftInputs, maxYears)
+  const right = useYearly
+    ? calculateStrategy(rightInputs, maxYears, yearlyRates, startFinancialYear)
+    : calculateStrategy(rightInputs, maxYears)
 
   return {
     left,

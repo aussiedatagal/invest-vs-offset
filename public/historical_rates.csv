@@ -1,0 +1,51 @@
+# Financial year (year Y = 1 July Y-1 to 30 June Y). Same period for both. One source per series.
+# housing_lending_rate_pct: RBA F5. Housing loans; Banks; Variable; Standard; Owner-occupier. Avg monthly rate over FY. Source: f05hist.xlsx
+# asx_return_pct: S&P/ASX 200 Accumulation Index total return, dividends reinvested, financial year. Source: RBA Table F7 (https://www.rba.gov.au/statistics/tables/pdf/f07.pdf).
+financial_year,housing_lending_rate_pct,asx_return_pct
+1981,10.94,15.77
+1982,12.62,-29.06
+1983,13.08,34.72
+1984,11.83,13.48
+1985,11.64,36.51
+1986,13.78,42.48
+1987,15.5,54.02
+1988,14.14,-8.61
+1989,15.27,3.53
+1990,16.88,4.08
+1991,15.05,5.87
+1992,11.84,13.33
+1993,9.87,9.91
+1994,8.89,18.47
+1995,9.89,5.71
+1996,10.44,15.83
+1997,8.38,26.56
+1998,6.77,1.65
+1999,6.61,15.34
+2000,7.02,15.51
+2001,7.63,9.07
+2002,6.34,-4.69
+2003,6.57,-1.71
+2004,6.88,21.61
+2005,7.15,26.35
+2006,7.36,23.93
+2007,7.97,28.66
+2008,8.8,-13.41
+2009,7.28,-20.14
+2010,6.53,13.14
+2011,7.66,11.73
+2012,7.45,-6.71
+2013,6.53,22.75
+2014,5.95,17.44
+2015,5.79,5.68
+2016,5.53,0.56
+2017,5.27,14.09
+2018,5.22,13.01
+2019,5.31,11.55
+2020,4.74,-7.68
+2021,4.52,27.8
+2022,4.6,-6.87
+2023,7.39,15.96
+# 2024: RBA F5 (housing); RBA F7 (ASX accumulation).
+2024,6.52,14.61
+# 2025: RBA F5 (housing); RBA F7 (ASX accumulation).
+2025,5.98,12.18
