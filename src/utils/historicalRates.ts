@@ -38,7 +38,7 @@ function parseCsvLine(line: string): string[] {
 
 export async function loadHistoricalRates(): Promise<HistoricalYearRates[]> {
   if (cachedRates) return cachedRates
-  const res = await fetch('/historical_rates.csv')
+  const res = await fetch(`${import.meta.env.BASE_URL}historical_rates.csv`)
   const text = await res.text()
   const lines = text.split(/\r?\n/).filter((l) => l && !l.startsWith('#'))
   const header = parseCsvLine(lines[0])
